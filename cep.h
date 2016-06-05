@@ -24,7 +24,7 @@ typedef struct {
 
 int abreCep();
 Endereco leCep(long pos);
-int imprimeCep(Endereco reg);
+int imprimeCep(long pos, Endereco reg);
 int pesquisaListaCep(char cep[9]);
 int fechaCep();
 

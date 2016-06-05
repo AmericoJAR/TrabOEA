@@ -1,7 +1,7 @@
 /******************************************************************
-04/06/2016                   Trabalho                    04/06/2016
+04/06/2016                   TrabOEA                    04/06/2016
 -------------------------------------------------------------------
-Programa..: Trabalho
+Programa..: TrabOEA
 Autor.....: José Américo Rodrigues
 Finalidade: Pesquisa de registros em um arquivo não ordenado de CEPs
             através de tabela hash
@@ -20,7 +20,6 @@ int main() {
     // Abertura dos arquivos
     abreCep();
     abreHash();
-
     // Loop para continuação da exibição do menu
     do {
         opcao = menu();
@@ -28,7 +27,7 @@ int main() {
             case 1: pesquisaHash();     break;
             case 2: estatisticasHash(); break;
             case 3: listaCep();         break;
-            case 4: pesquisaListaCep('48010140');  break;
+            case 4: pesquisaListaCep("48010140");  break;
             case 5: listaHash();        break;
             case 0: sair();             break;
             default:
@@ -37,7 +36,6 @@ int main() {
                 break;
         }
     } while(opcao != 0);  //Condição de saída
-
 	return 0;
 }
 
@@ -49,6 +47,5 @@ int sair() {
 
 	fechaCep();    // Fecha o arquivo de CEPs
 	fechaHash();   // Fecha o arquivo de ordenação (hash)
-
     return 1;
 }

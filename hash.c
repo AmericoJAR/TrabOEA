@@ -40,8 +40,8 @@ int criaHash() {
             printf("\x219");    // Exibe o andamento do processo
         }
     }
+    // Exibindo uma barra de progressão
     printf(" 100%%\n\n");
-
 	printf("Indexando o arquivo de CEPs...    ");
 	printf("0%% ");
  	registro++;
@@ -123,7 +123,6 @@ int criaHash() {
         e = leCep(registro);    // Lê o próximo CEP
     }
     printf(" 100%%\n\n");
-
 	return 0;
 }
 
@@ -147,8 +146,7 @@ int pesquisaHash() {
         // CEP encontrado de primeira... Pegando informações do arquivo de CEPs
         e = leCep(ht.PosArq);
         printf("CEP %s encontrado! - ", cep);
-        printf("posicao: %ld", ht.PosArq);
-        imprimeCep(e);
+        imprimeCep(ht.PosArq, e);
     }
     // CEP houve colisão ou não foi encontrado
     else {
@@ -157,7 +155,6 @@ int pesquisaHash() {
 
     }
 	pausa();
-
 	return 0;
 }
 
@@ -210,7 +207,6 @@ int estatisticasHash() {
 
     free(colisoes);
     pausa();
-
 	return 0;
 }
 
@@ -277,10 +273,10 @@ Parâmetros: reg - Registro a ser gravado
                   sição corrente ou ao fim do arquivo?
 ******************************************************************/
 int escreveHash(HashTab reg, long pos, int rel) {
-        fseek(arqhash, pos * sizeof(HashTab), rel);
-        // Guarda o registro no arquivo
-        fwrite(&reg, sizeof(HashTab), 1, arqhash);
-        return 1;
+    fseek(arqhash, pos * sizeof(HashTab), rel);
+    // Grava o registro no arquivo
+    fwrite(&reg, sizeof(HashTab), 1, arqhash);
+    return 1;
 }
 
 /******************************************************************

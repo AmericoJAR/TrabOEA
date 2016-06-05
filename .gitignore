@@ -11,6 +11,7 @@
 # Arquivos de projeto
 *.cbp
 *.layout
+*.depend
 
 # Precompiled Headers
 *.gch

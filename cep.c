@@ -6,7 +6,6 @@ Autor.....: José Américo Rodrigues
 Finalidade: Operações no arquivo nao ordenado de CEPs
 ******************************************************************/
 #include <cep.h>
-#include <stdbool.h>
 
 /******************************************************************
 Função....: listaCep
@@ -21,8 +20,7 @@ int listaCep() {
     registro++;
     e = leCep(registro);
     while(!feof(arqcep)) {
-        printf("\nRegistro: %ld - ", registro);
-        imprimeCep(e);
+        imprimeCep(registro, e);
         registro++;
         e = leCep(registro);
     }
@@ -37,7 +35,7 @@ Finalidade: Lista os registros do arquivo de CEPs após pesquisa de
 ******************************************************************/
 int pesquisaListaCep(char cep[9]) {
     long registro = -1;
-    bool naoencontrado = true;
+    int naoencontrado = 1;
 
     limpaTela();
 	printf("Listando o arquivo de CEPs a partir do CEP %s...\n\n", cep);
@@ -45,10 +43,9 @@ int pesquisaListaCep(char cep[9]) {
     registro++;
     e = leCep(registro);
     while(!feof(arqcep)) {
-        if (e.cep == cep) naoencontrado = false;
-        if (!naoencontrado) {
-            printf("\nRegistro: %ld - ", registro);
-            imprimeCep(e);
+        if (strcmp(e.cep, cep)) naoencontrado = 0;
+        if (naoencontrado == 0) {
+            imprimeCep(registro, e);
         }
         registro++;
         e = leCep(registro);
@@ -95,15 +92,19 @@ Endereco leCep(long pos) {
 /******************************************************************
 Função....: imprimeCep
 Finalidade: imprime um registro do arquivo de CEPs
-Parâmetros: reg - registro a ser impresso
+Parâmetros: pos - Deslocamento do registro em relação ao início do
+                  arquivo de CEPs
+            reg - registro a ser impresso
 ******************************************************************/
-int imprimeCep(Endereco reg) {
-    printf("\n\nEndereco: %72s", reg.endereco);
-    printf("\nBairro..: %72s", reg.bairro);
-    printf("\nCidade..: %72s", reg.cidade);
-    printf("\nEstado..: %72s", reg.nomeEstado);
-    printf("\nUF......: %2s", reg.siglaEstado);
-    printf("\nCEP.....: %8s", reg.cep);
+int imprimeCep(long pos, Endereco reg) {
+    printf("\nReg...: %ld", pos);
+    printf("\nEnder.: %72s", reg.endereco);
+    printf("Bairro: %72s", reg.bairro);
+    printf("Cidade: %72s", reg.cidade);
+    printf("Estado: %72s", reg.nomeEstado);
+    printf("UF....: %2s", reg.siglaEstado);
+    printf("\nCEP...: %8s\n", reg.cep);
+    return 0;
 }
 
 /******************************************************************
