@@ -4,6 +4,14 @@
 *.obj
 *.elf
 
+# Arquivos de dados
+*.dat
+*.idx
+
+# Arquivos de projeto
+*.cbp
+*.layout
+
 # Precompiled Headers
 *.gch
 *.pch
