@@ -39,14 +39,12 @@ int pesquisaListaCep(char cep[9]) {
 
     limpaTela();
 	printf("Listando o arquivo de CEPs a partir do CEP %s...\n\n", cep);
-
     registro++;
     e = leCep(registro);
     while(!feof(arqcep)) {
+        // Imprime somente o registro selecionado e posteriores
         if (strcmp(e.cep, cep)) naoencontrado = 0;
-        if (naoencontrado == 0) {
-            imprimeCep(registro, e);
-        }
+        if (naoencontrado == 0) imprimeCep(registro, e);
         registro++;
         e = leCep(registro);
     }
@@ -59,7 +57,6 @@ Função....: abreCep
 Finalidade: Abre o arquivo de CEPs
 ******************************************************************/
 int abreCep() {
-
     // Verifica a existência do arquivo de CEPs e abre-o
 	arqcep = fopen(CEPFILE,"r");
 	if(!arqcep) {
@@ -112,7 +109,6 @@ Função....: fechaCep
 Finalidade: Fecha o arquivo de CEPs
 ******************************************************************/
 int fechaCep() {
-
 	fclose(arqcep); // Fecha o arquivo de CEPs
     return 0;
 }

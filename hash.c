@@ -26,52 +26,48 @@ int criaHash() {
     fechaHash();
     arqhash = fopen(HASHFILE, "r+");  //Reabre-o
     abreCep();
-
     limpaTela();   // Limpa a tela
-	printf("Criando o arquivo de indices...   ");
-	printf("0%% ");
+	printf("Criando o arquivo de indices (hash)...   ");
+	printf("0%% "); // Inicia a barra de progresso
     // Loop para inclusão das linhas da tabela
     for (i = 0; i <= MAXHASH; i++) {
-         // Inicializando os dados da tabela
-        ht.CEP = 0; ht.PosArq = -1; ht.Proximo = -1;
-        // Adiciona o registro no final do arquivo
-        escreveHash(ht, 0, SEEK_END);    //
-        if (i % 45000 == 0) {
-            printf("\x219");    // Exibe o andamento do processo
-        }
+        ht.CEP = 0; ht.PosArq = -1; ht.Proximo = -1; // Inicializa os dados da tabela
+        escreveHash(ht, 0, SEEK_END);                // Adiciona o registro no final do arquivo
+        if (i % 45000 == 0) printf("\x219");         // Exibe o andamento do processo
     }
-    // Exibindo uma barra de progressão
-    printf(" 100%%\n\n");
-	printf("Indexando o arquivo de CEPs...    ");
+    printf(" 100%%\n\n");   // Finaliza a barra de progresso
+	printf("Indexando o arquivo de CEPs (hash)...    ");
 	printf("0%% ");
  	registro++;
-    e = leCep(registro);   //Le o primeiro registro do arquivo de CEps
-    // Loop para circular nos registro de CEPs
+    e = leCep(registro);   //Lê o primeiro registro do arquivo de CEps
+    // Loop para circular pelos registros de CEPs
 	while (strlen(e.cep) > 0) {
-        // Calcula a posição para pesquisar
-        h = strtol(e.cep, NULL, 10) % MAXHASH;
+        h = strtol(e.cep, NULL, 10) % MAXHASH;  // Calcula a posição para pesquisar
         // Vai até a linha calculada da tabela e guarda as informações contidas
         ht = leHash(h);
+        // Guarda as informações na variável auxiliar
+        htaux.CEP = strtol(e.cep, NULL, 10);    // Novo CEP
+        htaux.PosArq = registro;                // Posição da linha do arquivo de CEPs
+        htaux.Proximo = -1;                     // Não há ainda colisão
         // Se não houver um CEP na linha...
         if (ht.CEP == 0) {
-            // Guarda-se a nova informação do arquivo de CEPs
-            htaux.CEP = strtol(e.cep, NULL, 10);    // Novo CEP
-            htaux.PosArq = registro;                // Posição da linha do arquivo de CEPs
-            htaux.Proximo = -1;                     // Não há ainda colisão
-            escreveHash(htaux, h, SEEK_SET);
-         }
-
+            escreveHash(htaux, h, SEEK_SET);    // Guarda o CEP no arquivo hash
+printf("\nCEP: %s - ", e.cep);
+printf("CEP: %ld - ", ht.CEP);
+printf("PosArq: %ld - ", ht.PosArq);
+printf("Prox: %ld - ", ht.Proximo);
+printf("\nCEP: %ld - ", htaux.CEP);
+printf("PosArq: %ld - ", htaux.PosArq);
+printf("Prox: %ld - ", htaux.Proximo);
+printf("Pos: %ld - ", h);
+printf("SEEK_SET\n");
+        }
         // Há colisão...
         else {
-
             // 1ª colisão
             if (ht.Proximo == -1) {
-                // Adiciona o novo CEP no final do arquivo
-                htaux.CEP = strtol(e.cep, NULL, 10);    // Novo CEP
-                htaux.PosArq = registro;                // Posição da linha do arquivo de CEPs
-                htaux.Proximo = -1;                     // Não há mais colisões
-                escreveHash(htaux, 0, SEEK_END);
-                // Guarda-se a posição da nova linha para sobrescrever o campo
+                escreveHash(htaux, 0, SEEK_END);    // Adiciona o CEP no final do arquivo
+                // Guarda a posição da nova linha para sobrescrever o campo
                 // Proximo da linha onde houve a colisão
                 posicaofinal = (ftell(arqhash) / sizeof(HashTab));
                 // Guarda-se a nova informação do arquivo de CEPs
@@ -79,46 +75,58 @@ int criaHash() {
                 htaux.PosArq = ht.PosArq;
                 htaux.Proximo = posicaofinal;
                 escreveHash(htaux, h, SEEK_SET);
+printf("\nCEP: %s - ", e.cep);
+printf("CEP: %ld - ", ht.CEP);
+printf("PosArq: %ld - ", ht.PosArq);
+printf("Prox: %ld - ", ht.Proximo);
+printf("\nCEP: %ld - ", htaux.CEP);
+printf("PosArq: %ld - ", htaux.PosArq);
+printf("Prox: %ld - ", htaux.Proximo);
+printf("Pos: %ld - ", h);
+printf("SEEK_SET\n");
             }
-
             // Há várias colisões
             else {
-                posicaoanterior = 0;
+                posicaoanterior = ht.Proximo;
                 // Loop para circular por todas as colisões encontradas
                 while (ht.Proximo != -1) {
                     ht = leHash(ht.Proximo);
-                    if (ht.Proximo != -1) {
-                        posicaoanterior = ht.Proximo;
-                    }
-                    printf("Proximo: %ld", ht.Proximo);
-                    printf("Posicao anterior: %ld", posicaoanterior);
+                    if (ht.Proximo != -1) posicaoanterior = ht.Proximo;
                 }
-
-                // Adiciona o novo CEP no final do arquivo
-                htaux.CEP = strtol(e.cep, NULL, 10);    // Novo CEP
-                htaux.PosArq = registro;                // Posição da linha do arquivo de CEPs
-                htaux.Proximo = -1;                     // Não há mais colisões
-                escreveHash(htaux, 0, SEEK_END);
+                escreveHash(htaux, 0, SEEK_END);    // Adiciona o novo CEP no final do arquivo
+printf("\nCEP: %s - ", e.cep);
+printf("CEP: %ld - ", ht.CEP);
+printf("PosArq: %ld - ", ht.PosArq);
+printf("Prox: %ld - ", ht.Proximo);
+printf("\nCEP: %ld - ", htaux.CEP);
+printf("PosArq: %ld - ", htaux.PosArq);
+printf("Prox: %ld - ", htaux.Proximo);
+printf("Pos: %ld - ", 0);
+printf("SEEK_END\n");
                 // Guarda-se a posição da nova linha para sobrescrever o campo
                 // Proximo da linha onde houve a colisão
                 posicaofinal = (ftell(arqhash) / sizeof(HashTab));
-
-                    printf("Entrei aqui!");
-                    printf("Proximo: %ld", ht.Proximo);
-                    printf("Posicao anterior: %ld", posicaoanterior);
-                    printf("Posicao final: %ld", posicaofinal);
-
-                // Guarda-se a nova informação do arquivo de CEPs
+//    printf("\nCEP: %ld - ",ht.CEP);
+//    printf("Proximo: %ld - ", ht.Proximo);
+//    printf("Posicao anterior: %ld - ", posicaoanterior);
+//    printf("Posicao final: %ld\n", posicaofinal);
+                // Grava a nova informação do arquivo de CEPs
                 htaux.CEP = ht.CEP;
                 htaux.PosArq = ht.PosArq;
                 htaux.Proximo = posicaofinal;
                 escreveHash(htaux, posicaoanterior, SEEK_SET);
+printf("\nCEP: %s - ", e.cep);
+printf("CEP: %ld - ", ht.CEP);
+printf("PosArq: %ld - ", ht.PosArq);
+printf("Prox: %ld - ", ht.Proximo);
+printf("\nCEP: %ld - ", htaux.CEP);
+printf("PosArq: %ld - ", htaux.PosArq);
+printf("Prox: %ld - ", posicaofinal);
+printf("Pos: %ld - ", posicaoanterior);
+printf("SEEK_SET\n");
             }
         }
-        if (registro % 45000 == 0) {
-            printf("\x219");    // Exibe o andamento do processo
-        }
-
+        if (registro % 45000 == 0) printf("\x219"); // Exibe o andamento do processo
         registro++;
         e = leCep(registro);    // Lê o próximo CEP
     }
@@ -240,7 +248,6 @@ Função....: abreHash
 Finalidade: Abre o arquivo da tabela hash
 ******************************************************************/
 int abreHash() {
-
     // Verifica a existência do arquivo de hash e abre-o.
     // Caso não exista, cria-o
 	arqhash = fopen(HASHFILE,"r");
@@ -273,7 +280,8 @@ Parâmetros: reg - Registro a ser gravado
                   sição corrente ou ao fim do arquivo?
 ******************************************************************/
 int escreveHash(HashTab reg, long pos, int rel) {
-    fseek(arqhash, pos * sizeof(HashTab), rel);
+    // Pesquisa no deslocamento o registro selecionado
+    fseek(arqhash, pos * sizeof(HashTab), rel); // Pesquisa
     // Grava o registro no arquivo
     fwrite(&reg, sizeof(HashTab), 1, arqhash);
     return 1;
@@ -284,7 +292,6 @@ Função....: fechaHash
 Finalidade: Fecha o arquivo da tabela hash
 ******************************************************************/
 int fechaHash() {
-
 	fclose(arqhash);     // Fecha o arquivo de ordenação (hash)
     return 1;
 }

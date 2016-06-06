@@ -44,7 +44,6 @@ Função....: sair
 Finalidade: Finaliza as operações no arquivo de CEPs
 ******************************************************************/
 int sair() {
-
 	fechaCep();    // Fecha o arquivo de CEPs
 	fechaHash();   // Fecha o arquivo de ordenação (hash)
     return 1;

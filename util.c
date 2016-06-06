@@ -13,8 +13,7 @@ Função....: menu
 Finalidade: Apresentar menu principal do aplicativo
 ******************************************************************/
 int menu() {
-	// Guarda a opção do menu a ser passada para a função principal
-    int num;
+    int num;    // Guarda a opção selecionada
 
     limpaTela();  // Limpa a tela
     // Exibe o menu de opções
