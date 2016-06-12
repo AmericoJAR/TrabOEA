@@ -56,6 +56,6 @@ Finalidade: pausa o processo mostrando mensagem (parecido com o DOS)
 ******************************************************************/
 int pausa() {
     printf("\n\nPressione qualquer tecla para continuar... \n");
-    getchar();
+    getchar(); getchar();
     return 0;
 }

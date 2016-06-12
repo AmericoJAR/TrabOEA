@@ -11,7 +11,11 @@ A finalidade deste trabalho é o de aprendizado na manipulação de estruturas de i
 Comandos para compilação e linkedição:
 --------------------------------------
 gcc.exe -c cep.c -o cep.o
+
 gcc.exe -c hash.c -o hash.o
+
 gcc.exe -c main.c -o main.o
+
 gcc.exe -c util.c -o util.o
+
 gcc.exe cep.o hash.o main.o util.o -o OEA.exe
