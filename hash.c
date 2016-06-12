@@ -6,147 +6,125 @@ Autor.....: José Américo Rodrigues
 Finalidade: Operações no arquivo da tabela hash
 ******************************************************************/
 #include <stdlib.h>
-#include <hash.h>
-#include <cep.h>
-#include <util.h>
+#include <math.h>
+#include "hash.h"
+#include "cep.h"
+#include "util.h"
+
 
 /******************************************************************
 Função....: criaHash
-Finalidade: Cria o arquivo da tabela hash (índices)
+Finalidade: Cria o arquivo zerado da tabela hash
 ******************************************************************/
 int criaHash() {
-    int i;                      // Variável auxiliar para os índices
-    long h;                     // Posição na tabela hash
-    long registro = -1;         // Posição atual do registro de CEPs
-    long posicaofinal;          // Final do arquivo de índices (hash)
-    long posicaoarqanterior;    // Posição anterior no arquivo (hash)
-    long posicaoanterior;       // Posiçao anterior no arquivo
-    HashTab htaux, htant;       // Auxiliares para adicionar registros na tabela
-
-    arqhash = fopen(HASHFILE, "w");
-    fechaHash();
-    arqhash = fopen(HASHFILE, "r+");  //Reabre-o
-    abreCep();
-    limpaTela();   // Limpa a tela
-	printf("Criando o arquivo de indices (hash)...   ");
-	printf("0%% "); // Inicia a barra de progresso
+	HashTab ht;     					// Estrutura para o registro da tabela
+    int i;								// Variável auxiliar
+    long marco = trunc(MAXHASH / 50);	// Auxiliar para o marco da barra de progresso
+    
+    arqhash = fopen(HASHFILE, "w");							// Cria o arquivo
+    arqhash = freopen(HASHFILE, "r+", arqhash);  			// Reabre-o para escrita
+	printf("Criando o arquivo inicial de índices...   ");	// Exibe mensagem de criação
+	printf("\n\n0%% ");										// Inicia a barra de progresso
+    ht = inicializaHash(0, -1, -1);							// Inicializa os dados dos registros
     // Loop para inclusão das linhas da tabela
     for (i = 0; i <= MAXHASH; i++) {
-        ht.CEP = 0; ht.PosArq = -1; ht.Proximo = -1; // Inicializa os dados da tabela
-        escreveHash(ht, 0, SEEK_END);                // Adiciona o registro no final do arquivo
-        if (i % 45000 == 0) printf("\x219");         // Exibe o andamento do processo
+        escreveHash(ht, 0, SEEK_END);                		// Adiciona o registro no final do arquivo
+        if (i % marco == 0) printf("%c", 187);     	 		// Exibe o andamento do processo
     }
-    printf(" 100%%\n\n");   // Finaliza a barra de progresso
-	printf("Indexando o arquivo de CEPs (hash)...    ");
-	printf("0%% ");
- 	registro++;
-    e = leCep(registro);   //Lê o primeiro registro do arquivo de CEps
+    printf(" 100%%\n\n");   								// Finaliza a barra de progresso
+    fechaHash();											// Fecha o arquivo de hash
+	return 0;
+}
+
+/******************************************************************
+Função....: indexaHash
+Finalidade: Indexa o arquivo da tabela hash através do arquivo de CEPs
+******************************************************************/
+int indexaHash() {
+	Endereco e;     // Estrutura para guardar um registro
+    HashTab ht, htaux, htant;   // Auxiliares para adicionar registros na tabela
+    long h = 0;					// Posição na tabela hash
+    long registro = -1;			// Posição atual do registro de CEPs
+    long posicaofinal = 0;		// Final do arquivo de índices (hash)
+//    long posicaoarqanterior;    // Posição anterior no arquivo (hash)
+//    long posicaoanterior;       // Posiçao anterior no arquivo
+    long marco;					// Auxiliar para o marco da barra de progresso
+
+	marco = trunc(ultregCep()/50);		// Calcula o marco para desenho da barra
+    arqhash = fopen(HASHFILE, "r+");	// Abre o índice hash zerado
+    abreCep();							// Abre o arquivo de CEPs
+	printf("Indexando o arquivo de CEPs (hash)...     ");
+	printf("\n\n0%% ");
     // Loop para circular pelos registros de CEPs
-	while (strlen(e.cep) > 0) {
-        h = strtol(e.cep, NULL, 10) % MAXHASH;  // Calcula a posição para pesquisar
+	//while (strlen(e.cep) > 0) {
+	while(!feof(arqcep)) {
+ 		registro++;
+    	e = leCep(registro);   //Lê o primeiro registro do arquivo de CEps
+printf("\n\nLido do arquivo de CEPs - Posição: %ld - CEP: %s", registro, e.cep);
+        h = calculaHash(atol(e.cep));  // Calcula a posição para a indexação
+printf("\nPosição calculada no hash: %ld - CEP: %ld % 900001", h, atol(e.cep));
         // Vai até a linha calculada da tabela e guarda as informações contidas
         ht = leHash(h);
-        // Guarda as informações na variável auxiliar
-        htaux.CEP = strtol(e.cep, NULL, 10);    // Novo CEP
-        htaux.PosArq = registro;                // Posição da linha no arquivo de CEPs
-        htaux.Proximo = -1;                     // Não há ainda colisão
-        // Se não houver um CEP na linha...
-        if (ht.CEP == 0) {
-            escreveHash(htaux, h, SEEK_SET);    // Guarda o CEP no arquivo hash
-printf("\nCEP: %s - ", e.cep);
-printf("CEP: %ld - ", ht.CEP);
+printf("\n(LEITURA) Posição: %ld - CEP: %ld - ", h, ht.CEP);
 printf("PosArq: %ld - ", ht.PosArq);
-printf("Prox: %ld - ", ht.Proximo);
-printf("\nCEP: %ld - ", htaux.CEP);
-printf("PosArq: %ld - ", htaux.PosArq);
-printf("Prox: %ld - ", htaux.Proximo);
-printf("Pos: %ld - ", h);
-printf("SEEK_SET1\n");
+printf("Prox: %ld", ht.Proximo);
+        // Guarda as informações na variável auxiliar
+        htaux = inicializaHash(atol(e.cep), registro, -1);    // Novo CEP
+        // Se não houver um CEP na linha...
+        if ((ht.CEP == 0) || (ht.PosArq == -1)) {
+            escreveHash(htaux, h, SEEK_SET);    // Guarda o CEP no arquivo hash
         }
         // Há colisão...
         else {
-            // 1ª colisão
-            if (ht.Proximo == -1) {
-                escreveHash(htaux, 0, SEEK_END);    // Adiciona o CEP no final do arquivo
-printf("\nCEP: %s - ", e.cep);
-printf("CEP: %ld - ", ht.CEP);
-printf("PosArq: %ld - ", ht.PosArq);
-printf("Prox: %ld - ", ht.Proximo);
-printf("\nCEP: %ld - ", htaux.CEP);
-printf("PosArq: %ld - ", htaux.PosArq);
-printf("Prox: %ld - ", htaux.Proximo);
-printf("Pos: %ld - ", 0);
-printf("SEEK_END1\n");
-                // Guarda a posição da nova linha para sobrescrever o campo
-                // Proximo da linha onde houve a colisão
-                posicaofinal = (ftell(arqhash) / sizeof(HashTab));
-                // Guarda-se a nova informação do arquivo de CEPs
-                htaux.CEP = ht.CEP;
-                htaux.PosArq = ht.PosArq;
-                htaux.Proximo = posicaofinal;
-                escreveHash(htaux, h, SEEK_SET);
-printf("\nCEP: %s - ", e.cep);
-printf("CEP: %ld - ", ht.CEP);
-printf("PosArq: %ld - ", ht.PosArq);
-printf("Prox: %ld - ", ht.Proximo);
-printf("\nCEP: %ld - ", htaux.CEP);
-printf("PosArq: %ld - ", htaux.PosArq);
-printf("Prox: %ld - ", htaux.Proximo);
-printf("Pos: %ld - ", h);
-printf("SEEK_SET2\n");
-            }
-            // Há várias colisões
-            else {
+            // Se não for um CEP repetido...
+            if (ht.CEP != atol(e.cep)) {
+	            // 1ª colisão
+	            if (ht.Proximo == -1) {
+                	escreveHash(htaux, 0, SEEK_END);    // Adiciona o CEP no final do arquivo
+                	// Guarda a posição da nova linha para sobrescrever o campo
+                	// Proximo da linha onde houve a colisão
+                	posicaofinal = ultregHash() - 1;
+                	// Guarda a nova informação do arquivo de CEPs
+                	htaux=inicializaHash(ht.CEP, ht.PosArq, posicaofinal);
+                	escreveHash(htaux, h, SEEK_SET);
+	            }
+	            // Há várias colisões
+	            else {
 //                htant = ht;
                 //posicaoarqanterior = ht.PosArq;
 //                posicaoanterior = ht.Proximo;
                 // Loop para circular por todas as colisões encontradas
-                while (ht.Proximo != -1) {
-                    ht = leHash(ht.Proximo);
-printf("\nCEP: %s - ", e.cep);
-printf("CEP: %ld - ", ht.CEP);
-printf("PosArq: %ld - ", ht.PosArq);
-printf("Prox: %ld - ", ht.Proximo);
-printf("*******************\n");
-                   if (ht.Proximo != -1) {
+printf("***Várias colisões***");
+	                while (ht.Proximo != -1) {
+						htant = leHash(ht.Proximo);
+printf("\n(LEITURA-LOOP) Posição: %ld - CEP: %ld - ", ht.Proximo, htant.CEP);
+printf("PosArq: %ld - ", htant.PosArq);
+printf("Prox: %ld", htant.Proximo);
+						if (htant.Proximo != -1) {
                         //posicaoarqanterior = ht.PosArq;
 //                        posicaoanterior = ht.Proximo;
 //                        htant = ht;
-                    }
-                }
-                escreveHash(htaux, 0, SEEK_END);    // Adiciona o novo CEP no final do arquivo
-printf("CEP: %s - ", e.cep);
-printf("CEP: %ld - ", ht.CEP);
-printf("PosArq: %ld - ", ht.PosArq);
-printf("Prox: %ld - ", ht.Proximo);
-printf("\nCEP: %ld - ", htaux.CEP);
+	                    }
+	                }
+	                escreveHash(htaux, 0, SEEK_END);    // Adiciona o CEP no final do arquivo
+	                // Guarda-se a posição da nova linha para sobrescrever o campo
+	                // Proximo da linha onde houve a colisão
+	                posicaofinal = ultregHash() - 1;
+printf("\n(ADIÇÃO) Posição: %ld - CEP: %ld - ", posicaofinal, htaux.CEP);
 printf("PosArq: %ld - ", htaux.PosArq);
-printf("Prox: %ld - ", htaux.Proximo);
-printf("Pos: %ld - ", 0);
-printf("SEEK_END2\n");
-                // Guarda-se a posição da nova linha para sobrescrever o campo
-                // Proximo da linha onde houve a colisão
-                posicaofinal = (ftell(arqhash) / sizeof(HashTab));
-                // Grava a nova informação do arquivo de CEPs
-                htaux.CEP = strtol(e.cep, NULL, 10);
-                htaux.PosArq = registro;    //htant.PosArq; //posicaoarqanterior;
-                htaux.Proximo = posicaofinal;
-                escreveHash(htaux, h, SEEK_SET);
-printf("\nCEP: %s - ", e.cep);
-printf("CEP: %ld - ", htaux.CEP);
-printf("PosArq: %ld - ", ht.PosArq);
-printf("Prox: %ld - ", ht.Proximo);
-printf("\nCEP: %ld - ", htaux.CEP);
+printf("Prox: %ld", htaux.Proximo);
+	                // Grava a nova informação do arquivo de CEPs
+	                htaux = inicializaHash(strtol(e.cep, NULL, 10), htant.Proximo, posicaofinal);
+	                escreveHash(htaux, htant.Proximo, SEEK_SET);
+printf("\n(GRAVAÇÃO) Posição anterior: %ld - CEP: %ld - ", htant.Proximo, htaux.CEP);
 printf("PosArq: %ld - ", htaux.PosArq);
-printf("Prox: %ld - ", posicaofinal);
-printf("Pos: %ld - ", h);
-printf("SEEK_SET3\n");
+printf("Prox: %ld", htaux.Proximo);
 pausa();
+	            }
             }
         }
-        if (registro % 45000 == 0) printf("\x219"); // Exibe o andamento do processo
-        registro++;
-        e = leCep(registro);    // Lê o próximo CEP
+//if ((registro % 50 ==0) && (registro > 0)) pausa();
+        if (registro % marco == 0) printf("%c", 187);	// Exibe o andamento do processo
     }
     printf(" 100%%\n\n");
 	return 0;
@@ -157,6 +135,8 @@ Função....: pesquisaHash
 Finalidade: Consultar um elemento através da tabela de hash
 ******************************************************************/
 int pesquisaHash() {
+	Endereco e;     // Estrutura para guardar um registro
+    HashTab ht;   // Auxiliares para adicionar registros na tabela
 	char cep[9];  // Guarda o nome a ser pesquisado
 	long h;  // Guarda o número do registro
 
@@ -189,6 +169,7 @@ Função....: estatisticasHash
 Finalidade: Estatísticas gerais do arquivo de Hash
 ******************************************************************/
 int estatisticasHash() {
+	Endereco e;     // Estrutura para guardar um registro
 	int *colisoes;
 	long h;
     long registro = -1;
@@ -196,7 +177,7 @@ int estatisticasHash() {
 
     colisoes = malloc (MAXHASH * sizeof (int));
     if (colisoes == NULL) {
-        printf ("Erro! Nao foi possivel alocar memoria para o vetor.\n");
+        printf ("Erro! Nao foi possível alocar memória para o vetor.\n");
         exit (EXIT_FAILURE);
     }
 	int resultado[20];
@@ -209,8 +190,9 @@ int estatisticasHash() {
 
     registro++;
     e = leCep(registro);
-	while(strlen(e.cep) > 0) {
-        h = strtol(e.cep, NULL, 10) % MAXHASH;
+//	while(strlen(e.cep) > 0) {
+	while(!feof(arqcep)) {
+        h = calculaHash(strtol(e.cep, NULL, 10));
         colisoes[h]++;
         registro++;
         e = leCep(registro);
@@ -224,10 +206,8 @@ int estatisticasHash() {
         printf("Quantidade de elementos %ld: %d\n", i, resultado[i]);
     }
 
-    fseek(arqcep, 0, SEEK_END);
-	tamanho = ftell(arqcep);
  	// Exibe informações do arquivo de CEPs
-	printf("Total de CEPs no arquivo: %ld\n", tamanho/sizeof(Endereco));
+	printf("Total de CEPs no arquivo: %ld\n", ultregCep());
 	printf("Tamanho dos Registros...: %d bytes\n", sizeof(Endereco));
 	printf("Tamanho do Arquivo......: %ld bytes\n", tamanho);
 
@@ -241,19 +221,18 @@ Função....: listaHash
 Finalidade: Lista a tabela Hash
 ******************************************************************/
 int listaHash() {
+    HashTab ht;   // Auxiliares para adicionar registros na tabela
     long registro = -1;
 
     limpaTela();
-	printf("Listando o arquivo de indices...\n\n");
-
+	printf("Listando o arquivo de índices...\n\n");
     registro++;
     ht = leHash(registro);
     while(!feof(arqhash)) {
         printf("\nRegistro: %ld - ", registro);
-        printf("CEP...: %ld - ", ht.CEP);
-        printf("Posicao: %ld - ", ht.PosArq);
-        printf("Proximo: %ld", ht.Proximo);
-
+        printf("CEP: %ld - ", ht.CEP);
+        printf("Posição: %ld - ", ht.PosArq);
+        printf("Próximo: %ld", ht.Proximo);
         registro++;
         ht = leHash(registro);
     }
@@ -266,12 +245,13 @@ Função....: abreHash
 Finalidade: Abre o arquivo da tabela hash
 ******************************************************************/
 int abreHash() {
-    // Verifica a existência do arquivo de hash e abre-o.
-    // Caso não exista, cria-o
-	arqhash = fopen(HASHFILE,"r");
+    // Verifica a existência do arquivo de hash e o abre. Caso não exista, o cria.
+	arqhash = fopen(HASHFILE, "r");
 	if(!arqhash) {
         fclose(arqhash);
-		criaHash();
+    	limpaTela();   		// Limpa a tela
+		criaHash();			// Cria o arquivo de hash
+		indexaHash();		// Indexa através do arquivo de CEPs
 	}
     return 0;
 }
@@ -281,10 +261,14 @@ Função....: leHash
 Finalidade: Le um registro da tabela de Hash
 ******************************************************************/
 HashTab leHash(long pos) {
-    HashTab reg;
+    HashTab reg;	// Variável para a guarda de um registro de hash
 
-    fseek(arqhash, pos * sizeof(HashTab), SEEK_SET);
-    fread(&reg, sizeof(HashTab), 1, arqhash);
+    fseek(arqhash, pos * sizeof(HashTab), SEEK_SET);	// Posiciona o ponteiro na posição desejada
+    memset(&reg, 0, sizeof(HashTab));    				// Zera a variável para guardar o hash
+//    fread(&reg, sizeof(HashTab), 1, arqhash);			// Lê o registro
+    fread(&reg.CEP, 1, sizeof(long), arqhash);
+    fread(&reg.PosArq, 1, sizeof(long), arqhash);
+    fread(&reg.Proximo, 1,  sizeof(long), arqhash);
     return reg;
 }
 
@@ -293,15 +277,13 @@ Função....: escreveHash
 Finalidade: Grava um registro no arquivo da tabela de Hash
 Parâmetros: reg - Registro a ser gravado
             pos - Deslocamento do registro em relação ao início do
-                  arquivo de CEPs
+                  arquivo de hash
             rel - a pesquisa é relativa ao início do arquivo, à po-
                   sição corrente ou ao fim do arquivo?
 ******************************************************************/
 int escreveHash(HashTab reg, long pos, int rel) {
-    // Pesquisa no deslocamento o registro selecionado
-    fseek(arqhash, pos * sizeof(HashTab), rel); // Pesquisa
-    // Grava o registro no arquivo
-    fwrite(&reg, sizeof(HashTab), 1, arqhash);
+    fseek(arqhash, pos * sizeof(HashTab), rel);		// Posiciona o ponteiro na posição desejada
+    fwrite(&reg, sizeof(HashTab), 1, arqhash);		// Grava o registro no arquivo
     return 1;
 }
 
@@ -313,3 +295,32 @@ int fechaHash() {
 	fclose(arqhash);     // Fecha o arquivo de ordenação (hash)
     return 1;
 }
+
+/******************************************************************
+Função....: ultregHash
+Finalidade: Retorna a última posição do arquivo de hash
+******************************************************************/
+long ultregHash() {
+    return (ftell(arqhash) / sizeof(HashTab));
+}
+
+/******************************************************************
+Função....: calculaHash
+Finalidade: Retorna o cálculo para a tabela de dispersão
+******************************************************************/
+long calculaHash(long valor) {
+	return (valor % MAXHASH);	
+}
+
+/******************************************************************
+Função....: inicializaHash
+Finalidade: Incializa um registro da tabela de Hash
+******************************************************************/
+HashTab inicializaHash(long cep, long posarq, long proximo) {
+    HashTab reg;	// Variável para a guarda de um registro de hash
+
+	memset(&reg, 0, sizeof(HashTab));    						// Zera a variável para guardar o hash
+    reg.CEP = cep; reg.PosArq = posarq; reg.Proximo = proximo;	// Inicializa os dados dos registros
+	return reg;
+}
+

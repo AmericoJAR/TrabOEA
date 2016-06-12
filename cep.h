@@ -27,8 +27,9 @@ Endereco leCep(long pos);
 int imprimeCep(long pos, Endereco reg);
 int pesquisaListaCep(char cep[9]);
 int fechaCep();
+long ultregCep();
 
 FILE *arqcep;   // Ponteiro para o arquivo não ordenado de CEPs
-Endereco e;     // Estrutura para guardar um registro
+//Endereco e;     // Estrutura para guardar um registro
 
 #endif // CEP_H_INCLUDED
