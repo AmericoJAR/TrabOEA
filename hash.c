@@ -19,8 +19,9 @@ int criaHash() {
     long h;                     // Posição na tabela hash
     long registro = -1;         // Posição atual do registro de CEPs
     long posicaofinal;          // Final do arquivo de índices (hash)
-    long posicaoanterior;       // Final do arquivo de índices (hash)
-    HashTab htaux;              // Auxiliar para adicionar registros na tabela
+    long posicaoarqanterior;    // Posição anterior no arquivo (hash)
+    long posicaoanterior;       // Posiçao anterior no arquivo
+    HashTab htaux, htant;       // Auxiliares para adicionar registros na tabela
 
     arqhash = fopen(HASHFILE, "w");
     fechaHash();
@@ -47,7 +48,7 @@ int criaHash() {
         ht = leHash(h);
         // Guarda as informações na variável auxiliar
         htaux.CEP = strtol(e.cep, NULL, 10);    // Novo CEP
-        htaux.PosArq = registro;                // Posição da linha do arquivo de CEPs
+        htaux.PosArq = registro;                // Posição da linha no arquivo de CEPs
         htaux.Proximo = -1;                     // Não há ainda colisão
         // Se não houver um CEP na linha...
         if (ht.CEP == 0) {
@@ -60,13 +61,22 @@ printf("\nCEP: %ld - ", htaux.CEP);
 printf("PosArq: %ld - ", htaux.PosArq);
 printf("Prox: %ld - ", htaux.Proximo);
 printf("Pos: %ld - ", h);
-printf("SEEK_SET\n");
+printf("SEEK_SET1\n");
         }
         // Há colisão...
         else {
             // 1ª colisão
             if (ht.Proximo == -1) {
                 escreveHash(htaux, 0, SEEK_END);    // Adiciona o CEP no final do arquivo
+printf("\nCEP: %s - ", e.cep);
+printf("CEP: %ld - ", ht.CEP);
+printf("PosArq: %ld - ", ht.PosArq);
+printf("Prox: %ld - ", ht.Proximo);
+printf("\nCEP: %ld - ", htaux.CEP);
+printf("PosArq: %ld - ", htaux.PosArq);
+printf("Prox: %ld - ", htaux.Proximo);
+printf("Pos: %ld - ", 0);
+printf("SEEK_END1\n");
                 // Guarda a posição da nova linha para sobrescrever o campo
                 // Proximo da linha onde houve a colisão
                 posicaofinal = (ftell(arqhash) / sizeof(HashTab));
@@ -83,18 +93,29 @@ printf("\nCEP: %ld - ", htaux.CEP);
 printf("PosArq: %ld - ", htaux.PosArq);
 printf("Prox: %ld - ", htaux.Proximo);
 printf("Pos: %ld - ", h);
-printf("SEEK_SET\n");
+printf("SEEK_SET2\n");
             }
             // Há várias colisões
             else {
-                posicaoanterior = ht.Proximo;
+//                htant = ht;
+                //posicaoarqanterior = ht.PosArq;
+//                posicaoanterior = ht.Proximo;
                 // Loop para circular por todas as colisões encontradas
                 while (ht.Proximo != -1) {
                     ht = leHash(ht.Proximo);
-                    if (ht.Proximo != -1) posicaoanterior = ht.Proximo;
+printf("\nCEP: %s - ", e.cep);
+printf("CEP: %ld - ", ht.CEP);
+printf("PosArq: %ld - ", ht.PosArq);
+printf("Prox: %ld - ", ht.Proximo);
+printf("*******************\n");
+                   if (ht.Proximo != -1) {
+                        //posicaoarqanterior = ht.PosArq;
+//                        posicaoanterior = ht.Proximo;
+//                        htant = ht;
+                    }
                 }
                 escreveHash(htaux, 0, SEEK_END);    // Adiciona o novo CEP no final do arquivo
-printf("\nCEP: %s - ", e.cep);
+printf("CEP: %s - ", e.cep);
 printf("CEP: %ld - ", ht.CEP);
 printf("PosArq: %ld - ", ht.PosArq);
 printf("Prox: %ld - ", ht.Proximo);
@@ -102,28 +123,25 @@ printf("\nCEP: %ld - ", htaux.CEP);
 printf("PosArq: %ld - ", htaux.PosArq);
 printf("Prox: %ld - ", htaux.Proximo);
 printf("Pos: %ld - ", 0);
-printf("SEEK_END\n");
+printf("SEEK_END2\n");
                 // Guarda-se a posição da nova linha para sobrescrever o campo
                 // Proximo da linha onde houve a colisão
                 posicaofinal = (ftell(arqhash) / sizeof(HashTab));
-//    printf("\nCEP: %ld - ",ht.CEP);
-//    printf("Proximo: %ld - ", ht.Proximo);
-//    printf("Posicao anterior: %ld - ", posicaoanterior);
-//    printf("Posicao final: %ld\n", posicaofinal);
                 // Grava a nova informação do arquivo de CEPs
-                htaux.CEP = ht.CEP;
-                htaux.PosArq = ht.PosArq;
+                htaux.CEP = strtol(e.cep, NULL, 10);
+                htaux.PosArq = registro;    //htant.PosArq; //posicaoarqanterior;
                 htaux.Proximo = posicaofinal;
-                escreveHash(htaux, posicaoanterior, SEEK_SET);
+                escreveHash(htaux, h, SEEK_SET);
 printf("\nCEP: %s - ", e.cep);
-printf("CEP: %ld - ", ht.CEP);
+printf("CEP: %ld - ", htaux.CEP);
 printf("PosArq: %ld - ", ht.PosArq);
 printf("Prox: %ld - ", ht.Proximo);
 printf("\nCEP: %ld - ", htaux.CEP);
 printf("PosArq: %ld - ", htaux.PosArq);
 printf("Prox: %ld - ", posicaofinal);
-printf("Pos: %ld - ", posicaoanterior);
-printf("SEEK_SET\n");
+printf("Pos: %ld - ", h);
+printf("SEEK_SET3\n");
+pausa();
             }
         }
         if (registro % 45000 == 0) printf("\x219"); // Exibe o andamento do processo

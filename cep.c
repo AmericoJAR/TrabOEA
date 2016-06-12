@@ -19,7 +19,7 @@ int listaCep() {
 
     registro++;
     e = leCep(registro);
-    while(!feof(arqcep)) {
+    while (strlen(e.cep) > 0) { //while(!feof(arqcep)) {
         imprimeCep(registro, e);
         registro++;
         e = leCep(registro);
@@ -41,7 +41,7 @@ int pesquisaListaCep(char cep[9]) {
 	printf("Listando o arquivo de CEPs a partir do CEP %s...\n\n", cep);
     registro++;
     e = leCep(registro);
-    while(!feof(arqcep)) {
+    while (strlen(e.cep) > 0) { //while(!feof(arqcep)) {
         // Imprime somente o registro selecionado e posteriores
         if (strcmp(e.cep, cep)) naoencontrado = 0;
         if (naoencontrado == 0) imprimeCep(registro, e);
