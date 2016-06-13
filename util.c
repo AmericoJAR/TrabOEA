@@ -5,7 +5,7 @@ Arquivo...: util.c
 Autor.....: José Américo Rodrigues
 Finalidade: Arquivo de códigos utilitários do sistema
 ******************************************************************/
-#include <util.h>
+#include "util.h"
 #include <windows.h>
 
 /******************************************************************
@@ -20,12 +20,12 @@ int menu() {
 	printf("Consulta de CEPs\n\n");
 	printf("Menu:\n\n");
 	printf("1. Consultar CEP\n");
-	printf("2. Verificar estatisticas\n");
+	printf("2. Verificar estatísticas\n");
 	printf("3. Listar CEPs\n");
 	printf("4. Listar CEPs após consulta\n");
 	printf("5. Listar Tabela Hash\n");
 	printf("0. Sair\n\n");
-	printf("Escolha uma opcao: ");
+	printf("Escolha uma opção: ");
 	scanf("%d", &num);
 	return num;
 }

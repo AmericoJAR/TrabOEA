@@ -12,15 +12,17 @@ Finalidade: Header para operações na tabela hash em arquivo
 
 #define HASHFILE "cep_h.idx"
 #define MAXHASH 900001
+#define MAXCOLISOES 15
 
 // Estrutura para a leitura dos registros da tabela hash
 typedef struct {
-    long CEP;
-    long PosArq;
-    long Proximo;
+    long CEP;		// CEP gravado
+    long PosArq;	// Posição do CEP no arquivo de CEPs
+    long Proximo;	// Próximo CEP em colisão
 } HashTab;
 
 int criaHash();
+int indexaHash();
 int pesquisaHash();
 int estatisticasHash();
 int listaHash();
@@ -28,8 +30,11 @@ int abreHash();
 HashTab leHash(long pos);
 int escreveHash(HashTab reg, long pos, int rel);
 int fechaHash();
+long ultregHash();
+long calculaHash(long valor);
+HashTab inicializaHash(long cep, long posarq, long proximo);
 
 FILE *arqhash;  // Ponteiro para o arquivo da tabela hash
-HashTab ht;     // Estrutura para o registro da tabela
+//HashTab ht;     // Estrutura para o registro da tabela
 
 #endif // HASH_H_INCLUDED

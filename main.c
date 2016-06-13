@@ -6,45 +6,45 @@ Autor.....: José Américo Rodrigues
 Finalidade: Pesquisa de registros em um arquivo não ordenado de CEPs
             através de tabela hash
 ******************************************************************/
-#include <cep.h>
-#include <util.h>
-#include <hash.h>
+#include "cep.h"
+#include "util.h"
+#include "hash.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <windows.h>
+#include <locale.h>
 
 int main() {
     int opcao;  // Guarda a opção do menu
 
+	setlocale(LC_ALL, "Portuguese");	//habilita a acentuação para o português
     // Abertura dos arquivos
-    abreCep();
-    abreHash();
+    abreCep();    						// Abre o arquivo de CEPs
+    abreHash();   						// Abre o arquivo de ordenação (hash)
     // Loop para continuação da exibição do menu
     do {
         opcao = menu();
         switch(opcao){
-            case 1: pesquisaHash();     break;
-            case 2: estatisticasHash(); break;
-            case 3: listaCep();         break;
-            case 4: pesquisaListaCep("48010140");  break;
-            case 5: listaHash();        break;
-            case 0: sair();             break;
+            case 1: pesquisaHash();
+					break;
+            case 2: estatisticasHash();
+					break;
+            case 3: listaCep();
+					break;
+            case 4: pesquisaListaCep("48010140");
+					break;
+            case 5: listaHash();
+					break;
+            case 0: break;
             default:
-                printf("Opcao invalida!\n");
-                pausa();
-                break;
+                	printf("Opção inválida!\n");
+                	pausa();
+                	break;
         }
-    } while(opcao != 0);  //Condição de saída
+    } while(opcao != 0);  				//Condição de saída
+    // Fechamento dos arquivos
+    abreCep();    						// Fecha o arquivo de CEPs
+    abreHash();   						// Fecha o arquivo de ordenação (hash)
 	return 0;
-}
-
-/******************************************************************
-Função....: sair
-Finalidade: Finaliza as operações no arquivo de CEPs
-******************************************************************/
-int sair() {
-	fechaCep();    // Fecha o arquivo de CEPs
-	fechaHash();   // Fecha o arquivo de ordenação (hash)
-    return 1;
 }
