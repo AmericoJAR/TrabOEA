@@ -39,7 +39,11 @@ long calculaHash(long valor);
 HashTab inicializaHash(long cep, long posarq, long proximo);
 
 FILE *arqhash;  // Ponteiro para o arquivo da tabela hash
+<<<<<<< HEAD
 FILE *arqlog;   // Ponteiro para o arquivo de log
 //HashTab ht;   // Estrutura para o registro da tabela
+=======
+//HashTab ht;     // Estrutura para o registro da tabela
+>>>>>>> origin/master
 
 #endif // HASH_H_INCLUDED

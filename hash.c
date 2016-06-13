@@ -17,6 +17,10 @@ Atualizações:
 #include "hash.h"
 #include "cep.h"
 #include "util.h"
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/master
 
 /******************************************************************
 Função....: criaHash
@@ -47,15 +51,25 @@ Função....: indexaHash
 Finalidade: Indexa o arquivo da tabela hash através do arquivo de CEPs
 ******************************************************************/
 int indexaHash() {
+<<<<<<< HEAD
 	Endereco e;                 // Estrutura para guardar um registro
+=======
+	Endereco e;     // Estrutura para guardar um registro
+>>>>>>> origin/master
     HashTab ht, htaux, htant;   // Auxiliares para adicionar registros na tabela
     long h = 0;					// Posição na tabela hash
     long registro = -1;			// Posição atual do registro de CEPs
     long posicaofinal = 0;		// Final do arquivo de índices (hash)
+<<<<<<< HEAD
+=======
+//    long posicaoarqanterior;    // Posição anterior no arquivo (hash)
+//    long posicaoanterior;       // Posiçao anterior no arquivo
+>>>>>>> origin/master
     long marco;					// Auxiliar para o marco da barra de progresso
 
 	marco = trunc(ultregCep()/50);		// Calcula o marco para desenho da barra
     arqhash = fopen(HASHFILE, "r+");	// Abre o índice hash zerado
+<<<<<<< HEAD
     arqlog = fopen(LOGFILE, "w");	    // Abre o arquivo de log
     abreCep();							// Abre o arquivo de CEPs
 	printf("Indexando o arquivo de CEPs (hash)...     ");
@@ -72,15 +86,37 @@ int indexaHash() {
         fprintf(LOGFILE, "\n(LEITURA) Posição: %ld - CEP: %ld - ", h, ht.CEP);
         fprintf(LOGFILE, "PosArq: %ld - ", ht.PosArq);
         fprintf(LOGFILE, "Prox: %ld", ht.Proximo);
+=======
+    abreCep();							// Abre o arquivo de CEPs
+	printf("Indexando o arquivo de CEPs (hash)...     ");
+	printf("\n\n0%% ");
+    // Loop para circular pelos registros de CEPs
+	//while (strlen(e.cep) > 0) {
+    registro++;
+    e = leCep(registro);   //Lê o registro do arquivo de CEps
+printf("\n\nLido do arquivo de CEPs - Posição: %ld - CEP: %s", registro, e.cep);
+	while(strlen(e.cep) > 0) {
+        h = calculaHash(atol(e.cep));  // Calcula a posição para a indexação
+printf("\nPosição calculada no hash: %ld - CEP: %ld % 900001", h, atol(e.cep));
+        // Vai até a linha calculada da tabela e guarda as informações contidas
+        ht = leHash(h);
+printf("\n(LEITURA) Posição: %ld - CEP: %ld - ", h, ht.CEP);
+printf("PosArq: %ld - ", ht.PosArq);
+printf("Prox: %ld", ht.Proximo);
+>>>>>>> origin/master
         // Guarda as informações na variável auxiliar
         htaux = inicializaHash(atol(e.cep), registro, -1);    // Novo CEP
         // Se não houver um CEP na linha...
         if ((ht.CEP == 0) || (ht.PosArq == -1)) {
             escreveHash(htaux, h, SEEK_SET);    // Guarda o CEP no arquivo hash
+<<<<<<< HEAD
             fprintf(LOGFILE, "\n\nSEM COLISÃO\n(GRAVAÇÃO) Posição: %ld - CEP: %ld - ", h, htaux.CEP);
             fprintf(LOGFILE, "PosArq: %ld - ", htaux.PosArq);
             fprintf(LOGFILE, "Prox: %ld", htaux.Proximo);
        }
+=======
+        }
+>>>>>>> origin/master
         // Há colisão...
         else {
             // Se não for um CEP repetido...
@@ -88,6 +124,7 @@ int indexaHash() {
 	            // 1ª colisão
 	            if (ht.Proximo == -1) {
                 	escreveHash(htaux, 0, SEEK_END);    // Adiciona o CEP no final do arquivo
+<<<<<<< HEAD
                     // Guarda a posição da nova linha para sobrescrever o campo
                 	// Proximo da linha onde houve a colisão
                 	posicaofinal = ultregHash() - 1;
@@ -133,6 +170,55 @@ int indexaHash() {
         registro++;
         e = leCep(registro);   //Lê os registros do arquivo de CEps
         fprintf(LOGFILE, "\n\nPRÓXIMO\n\nLido do arquivo de CEPs - Posição: %ld - CEP: %s", registro, e.cep);
+=======
+                	// Guarda a posição da nova linha para sobrescrever o campo
+                	// Proximo da linha onde houve a colisão
+                	posicaofinal = ultregHash() - 1;
+                	// Guarda a nova informação do arquivo de CEPs
+                	htaux=inicializaHash(ht.CEP, ht.PosArq, posicaofinal);
+                	escreveHash(htaux, h, SEEK_SET);
+	            }
+	            // Há várias colisões
+	            else {
+//                htant = ht;
+                //posicaoarqanterior = ht.PosArq;
+//                posicaoanterior = ht.Proximo;
+                // Loop para circular por todas as colisões encontradas
+printf("***Várias colisões***");
+	                while (ht.Proximo != -1) {
+						htant = leHash(ht.Proximo);
+printf("\n(LEITURA-LOOP) Posição: %ld - CEP: %ld - ", ht.Proximo, htant.CEP);
+printf("PosArq: %ld - ", htant.PosArq);
+printf("Prox: %ld", htant.Proximo);
+						if (htant.Proximo != -1) {
+                        //posicaoarqanterior = ht.PosArq;
+//                        posicaoanterior = ht.Proximo;
+//                        htant = ht;
+	                    }
+	                }
+	                escreveHash(htaux, 0, SEEK_END);    // Adiciona o CEP no final do arquivo
+	                // Guarda-se a posição da nova linha para sobrescrever o campo
+	                // Proximo da linha onde houve a colisão
+	                posicaofinal = ultregHash() - 1;
+printf("\n(ADIÇÃO) Posição: %ld - CEP: %ld - ", posicaofinal, htaux.CEP);
+printf("PosArq: %ld - ", htaux.PosArq);
+printf("Prox: %ld", htaux.Proximo);
+	                // Grava a nova informação do arquivo de CEPs
+	                htaux = inicializaHash(strtol(e.cep, NULL, 10), htant.Proximo, posicaofinal);
+	                escreveHash(htaux, htant.Proximo, SEEK_SET);
+printf("\n(GRAVAÇÃO) Posição anterior: %ld - CEP: %ld - ", htant.Proximo, htaux.CEP);
+printf("PosArq: %ld - ", htaux.PosArq);
+printf("Prox: %ld", htaux.Proximo);
+pausa();
+	            }
+            }
+        }
+//if ((registro % 50 ==0) && (registro > 0)) pausa();
+        if (registro % marco == 0) printf("%c", 187);	// Exibe o andamento do processo
+        registro++;
+        e = leCep(registro);   //Lê os registros do arquivo de CEps
+printf("\n\nLido do arquivo de CEPs - Posição: %ld - CEP: %s", registro, e.cep);
+>>>>>>> origin/master
     }
     printf(" 100%%\n\n");
     fechaCep();							// Abre o arquivo de CEPs
@@ -145,10 +231,16 @@ Finalidade: Consultar um elemento através da tabela de hash
 ******************************************************************/
 int pesquisaHash() {
 	Endereco e;     // Estrutura para guardar um registro
+<<<<<<< HEAD
     HashTab ht;     // Auxiliares para adicionar registros na tabela
 	char cep[9];    // Guarda o nome a ser pesquisado
 	long h;         // Guarda o número do registro
 	int flag = 0;   // Se encontrado = 1 senão = 0
+=======
+    HashTab ht;   // Auxiliares para adicionar registros na tabela
+	char cep[9];  // Guarda o nome a ser pesquisado
+	long h;  // Guarda o número do registro
+>>>>>>> origin/master
 
     // Leitura via teclado do CEP a ser pesuisado
     printf("CEP a ser pesquisado: "); scanf("%s", cep);
@@ -229,9 +321,14 @@ int estatisticasHash() {
         e = leCep(registro);
     }
     tamarqCep = ftell(arqcep);
+<<<<<<< HEAD
     totalregCep = tamarqCep / sizeof(Endereco);
     fechaCep();							// Fecha o arquivo de CEPs
     printf(" 100%%\n");
+=======
+    printf(" 100%%\n");
+    fechaCep();							// Abre o arquivo de CEPs
+>>>>>>> origin/master
  	marco = trunc(MAXHASH / 30);
   	printf("Gerando estatisticas... 0%% ");
     for (i = 0; i <= MAXHASH; i++) {
@@ -240,7 +337,10 @@ int estatisticasHash() {
     }
     printf(" 100%%\n\n");
     limpaTela();
+<<<<<<< HEAD
  	// Exibe informações estatísticas
+=======
+>>>>>>> origin/master
     for (i = 0; i < MAXCOLISOES + 2; i++){
         if (i == 0) {
             printf("registros não ocupados: %d de %ld\n", resultado[0], MAXHASH);
@@ -254,6 +354,7 @@ int estatisticasHash() {
             printf("%ld colisões...........: %d\n", (i - 1), resultado[i]);
         }
         if (i > 1) somacolisoes = somacolisoes + resultado[i];
+<<<<<<< HEAD
     }
     printf("Somatório de colisões: %ld\n", somacolisoes);
     printf("Ocupação: %ld\n", resultado[1]);
@@ -261,6 +362,20 @@ int estatisticasHash() {
     printf("totalregCep: %ld\n", totalregCep);
     printf("Taxa de ocupação: %.2f%%\n", (resultado[1] / MAXHASH));
     printf("Taxa de colisões: %.2f%%\n", (somacolisoes / totalregCep));
+=======
+   }
+
+ 	// Exibe informações estatísticas
+    totalregCep = tamarqCep / sizeof(Endereco);
+
+   printf("Somatório de colisões: %ld\n", somacolisoes);
+   printf("Ocupação: %ld\n", resultado[1]);
+   printf("Hashs: %ld\n", MAXHASH);
+   printf("totalregCep: %ld\n", totalregCep);
+
+    printf("Taxa de ocupação: %2.2f%%\n", (resultado[1] / MAXHASH));
+    printf("Taxa de colisões: %2.2f%%\n", (somacolisoes / totalregCep));
+>>>>>>> origin/master
  	// Exibe informações do arquivo de CEPs
 	printf("Total de CEPs no arquivo: %ld\n", totalregCep);
 	printf("Tamanho dos Registros...: %d bytes\n", sizeof(Endereco));
@@ -377,3 +492,7 @@ HashTab inicializaHash(long cep, long posarq, long proximo) {
     reg.CEP = cep; reg.PosArq = posarq; reg.Proximo = proximo;	// Inicializa os dados dos registros
 	return reg;
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/master

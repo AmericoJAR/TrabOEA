@@ -22,7 +22,11 @@ int listaCep() {
 	printf("Listando o arquivo de CEPs...\n\n");
     registro++;
     e = leCep(registro);
+<<<<<<< HEAD
     //while (strlen(e.cep) > 0) {
+=======
+    //while (strlen(e.cep) > 0) { 
+>>>>>>> origin/master
 	while(!feof(arqcep)) {
         imprimeCep(registro, e);
         registro++;
@@ -46,7 +50,11 @@ int pesquisaListaCep(char cep[9]) {
 	printf("Listando o arquivo de CEPs a partir do CEP %s...\n\n", cep);
     registro++;
     e = leCep(registro);
+<<<<<<< HEAD
     //while (strlen(e.cep) > 0) {
+=======
+    //while (strlen(e.cep) > 0) { 
+>>>>>>> origin/master
 	while(!feof(arqcep)) {
         // Imprime somente o registro selecionado e posteriores
         if (strcmp(e.cep, cep)) naoencontrado = 0;
@@ -125,7 +133,11 @@ Finalidade: Retornar a última posição do arquivo de CEPs
 ******************************************************************/
 long ultregCep() {
 	long fim;
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> origin/master
 	abreCep();							// Abre o arquivo de CEPs
 	fseek(arqcep, 0, SEEK_END);
 	fim = ftell(arqcep);
