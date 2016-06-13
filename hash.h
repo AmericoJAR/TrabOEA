@@ -14,7 +14,6 @@ Atualizações:
 #include <stdio.h>
 
 #define HASHFILE "cep_h.idx"
-#define LOGFILE "cep_h.log"
 #define MAXHASH 900001
 #define MAXCOLISOES 15
 
@@ -39,7 +38,6 @@ long calculaHash(long valor);
 HashTab inicializaHash(long cep, long posarq, long proximo);
 
 FILE *arqhash;  // Ponteiro para o arquivo da tabela hash
-FILE *arqlog;   // Ponteiro para o arquivo de log
 // HashTab ht;   // Estrutura para o registro da tabela
 
 #endif // HASH_H_INCLUDED

@@ -18,6 +18,8 @@ Atualizações:
 #include "cep.h"
 #include "util.h"
 
+#define LOGFILE "cep_h.log"
+
 /******************************************************************
 Função....: criaHash
 Finalidade: Cria o arquivo zerado da tabela hash
@@ -47,6 +49,7 @@ Função....: indexaHash
 Finalidade: Indexa o arquivo da tabela hash através do arquivo de CEPs
 ******************************************************************/
 int indexaHash() {
+    FILE *arqlog;               // Ponteiro para o arquivo de log
 	Endereco e;                 // Estrutura para guardar um registro
     HashTab ht, htaux, htant;   // Auxiliares para adicionar registros na tabela
     long h = 0;					// Posição na tabela hash
@@ -56,31 +59,32 @@ int indexaHash() {
 
 	marco = trunc(ultregCep()/50);		// Calcula o marco para desenho da barra
     arqhash = fopen(HASHFILE, "r+");	// Abre o índice hash zerado
-    arqlog = fopen(LOGFILE, "w");	    // Abre o arquivo de log
+//    arqlog = fopen(LOGFILE, "w");	    // Abre o arquivo de log
     abreCep();							// Abre o arquivo de CEPs
 	printf("Indexando o arquivo de CEPs (hash)...     ");
 	printf("\n\n0%% ");
     registro++;
     e = leCep(registro);   //Lê o registro do arquivo de CEps
-    fprintf(LOGFILE, "INÍCIO DO LOG\n\n*** Registro:  %ld ***\nLido de CEPs - CEP: %s", registro, e.cep);
+//    fprintf("INÍCIO DO LOG", LOGFILE);
+//    fprintf(LOGFILE, "Registro: %l\n");
+//    fprintf(LOGFILE, "Lido de CEPs - CEP: %l", registro, atol(e.cep));
     // Loop para circular pelos registros de CEPs
-pausa();
 	while(strlen(e.cep) > 0) {
         h = calculaHash(atol(e.cep));  // Calcula a posição para a indexação
-        fprintf(LOGFILE, "\nHash calculado - Posição: %ld - CEP: %s % 900001", h, e.cep);
+//        fprintf(LOGFILE, "\nHash calculado - Posição: %ld - CEP: %s %% 900001", h, e.cep);
         // Vai até a linha calculada da tabela e guarda as informações contidas
         ht = leHash(h);
-        fprintf(LOGFILE, "\nLido do Hash - Posição: %ld - CEP: %ld - ", h, ht.CEP);
-        fprintf(LOGFILE, "PosArq: %ld - ", ht.PosArq);
-        fprintf(LOGFILE, "Prox: %ld", ht.Proximo);
+//        fprintf(LOGFILE, "\nLido do Hash - Posição: %ld - CEP: %ld - ", h, ht.CEP);
+//        fprintf(LOGFILE, "PosArq: %ld - ", ht.PosArq);
+//        fprintf(LOGFILE, "Prox: %ld", ht.Proximo);
         // Guarda as informações na variável auxiliar
         htaux = inicializaHash(atol(e.cep), registro, -1);    // Novo CEP
         // Se não houver um CEP na linha...
         if ((ht.CEP == 0) || (ht.PosArq == -1)) {
             escreveHash(htaux, h, SEEK_SET);    // Guarda o CEP no arquivo hash
-            fprintf(LOGFILE, "\n\nSEM COLISÃO\nGravado no Hash - Posição: %ld - CEP: %ld - ", h, htaux.CEP);
-            fprintf(LOGFILE, "PosArq: %ld - ", htaux.PosArq);
-            fprintf(LOGFILE, "Prox: %ld", htaux.Proximo);
+//            fprintf(LOGFILE, "\n\nSEM COLISÃO\nGravado no Hash - Posição: %ld - CEP: %ld - ", h, htaux.CEP);
+//            fprintf(LOGFILE, "PosArq: %ld - ", htaux.PosArq);
+//            fprintf(LOGFILE, "Prox: %ld", htaux.Proximo);
        }
         // Há colisão...
         else {
@@ -92,39 +96,39 @@ pausa();
                     // Guarda a posição da nova linha para sobrescrever o campo
                 	// Proximo da linha onde houve a colisão
                 	posicaofinal = ultregHash() - 1;
-                	fprintf(LOGFILE, "\n\n1 COLISÃO\nAdicionado no Hash - Posição: %ld - CEP: %ld - ", posicaofinal, htaux.CEP);
-                    fprintf(LOGFILE, "PosArq: %ld - ", htaux.PosArq);
-                    fprintf(LOGFILE, "Prox: %ld", htaux.Proximo);
+//                	fprintf(LOGFILE, "\n\n1 COLISÃO\nAdicionado no Hash - Posição: %ld - CEP: %ld - ", posicaofinal, htaux.CEP);
+//                    fprintf(LOGFILE, "PosArq: %ld - ", htaux.PosArq);
+//                    fprintf(LOGFILE, "Prox: %ld", htaux.Proximo);
                 	// Guarda a nova informação do arquivo de CEPs
                 	htaux=inicializaHash(ht.CEP, ht.PosArq, posicaofinal);
                 	escreveHash(htaux, h, SEEK_SET);
-                    fprintf(LOGFILE, "\nGravado no Hash - Posição anterior: %ld - CEP: %ld - ", h, htaux.CEP);
-                    fprintf(LOGFILE, "PosArq: %ld - ", htaux.PosArq);
-                    fprintf(LOGFILE, "Prox: %ld", htaux.Proximo);
+//                    fprintf(LOGFILE, "\nGravado no Hash - Posição anterior: %ld - CEP: %ld - ", h, htaux.CEP);
+//                    fprintf(LOGFILE, "PosArq: %ld - ", htaux.PosArq);
+//                    fprintf(LOGFILE, "Prox: %ld", htaux.Proximo);
 	            }
 	            // Há várias colisões
 	            else {
-                    fprintf(LOGFILE, "\n\nVÁRIAS COLISÕES");
+//                    fprintf(LOGFILE, "\n\nVÁRIAS COLISÕES");
                     // Loop para circular por todas as colisões encontradas
 	                while (ht.Proximo != -1) {
 						htant = leHash(ht.Proximo);
-                        fprintf(LOGFILE, "\nLido do Hash (LOOP) - Posição: %ld - CEP: %ld - ", ht.Proximo, htant.CEP);
-                        fprintf(LOGFILE, "PosArq: %ld - ", htant.PosArq);
-                        fprintf(LOGFILE, "Prox: %ld", htant.Proximo);
+//                        fprintf(LOGFILE, "\nLido do Hash (LOOP) - Posição: %ld - CEP: %ld - ", ht.Proximo, htant.CEP);
+//                        fprintf(LOGFILE, "PosArq: %ld - ", htant.PosArq);
+//                        fprintf(LOGFILE, "Prox: %ld", htant.Proximo);
 	                }
 	                escreveHash(htaux, 0, SEEK_END);    // Adiciona o CEP no final do arquivo
 	                // Guarda a posição da nova linha para sobrescrever o campo
 	                // Proximo da linha onde houve a colisão
 	                posicaofinal = ultregHash() - 1;
-                    fprintf(LOGFILE, "\nAdicionado no Hash - Posição: %ld - CEP: %ld - ", posicaofinal, htaux.CEP);
-                    fprintf(LOGFILE, "PosArq: %ld - ", htaux.PosArq);
-                    fprintf(LOGFILE, "Prox: %ld", htaux.Proximo);
+//                    fprintf(LOGFILE, "\nAdicionado no Hash - Posição: %ld - CEP: %ld - ", posicaofinal, htaux.CEP);
+//                    fprintf(LOGFILE, "PosArq: %ld - ", htaux.PosArq);
+//                    fprintf(LOGFILE, "Prox: %ld", htaux.Proximo);
 	                // Grava a nova informação do arquivo de CEPs
 	                htaux = inicializaHash(atol(e.cep), htant.Proximo, posicaofinal);
 	                escreveHash(htaux, htant.Proximo, SEEK_SET);
-                    fprintf(LOGFILE, "\nGravado no Hash - Posição anterior: %ld - CEP: %ld - ", htant.Proximo, htaux.CEP);
-                    fprintf(LOGFILE, "PosArq: %ld - ", htaux.PosArq);
-                    fprintf(LOGFILE, "Prox: %ld", htaux.Proximo);
+//                    fprintf(LOGFILE, "\nGravado no Hash - Posição anterior: %ld - CEP: %ld - ", htant.Proximo, htaux.CEP);
+//                    fprintf(LOGFILE, "PosArq: %ld - ", htaux.PosArq);
+//                    fprintf(LOGFILE, "Prox: %ld", htaux.Proximo);
                     pausa();
 	            }
             }
@@ -133,9 +137,10 @@ pausa();
         if (registro % marco == 0) printf("%c", 187);	// Exibe o andamento do processo
         registro++;
         e = leCep(registro);   //Lê os registros do arquivo de CEps
-        fprintf(LOGFILE, "\n\nPRÓXIMO\n\n*** Registro:  %ld ***\nLido de CEPs - CEP: %s", registro, e.cep);
+//        fprintf(LOGFILE, "\n\nPRÓXIMO\n\nRegistro: %ld\nLido de CEPs - CEP: %s", registro, e.cep);
     }
     printf(" 100%%\n\n");
+//    fclose(arqlog);
     fechaCep();							// Abre o arquivo de CEPs
 	return 0;
 }
