@@ -64,6 +64,7 @@ int indexaHash() {
     e = leCep(registro);   //Lê o registro do arquivo de CEps
     fprintf(LOGFILE, "INÍCIO DO LOG\n\n*** Registro:  %ld ***\nLido de CEPs - CEP: %s", registro, e.cep);
     // Loop para circular pelos registros de CEPs
+pausa();
 	while(strlen(e.cep) > 0) {
         h = calculaHash(atol(e.cep));  // Calcula a posição para a indexação
         fprintf(LOGFILE, "\nHash calculado - Posição: %ld - CEP: %s % 900001", h, e.cep);

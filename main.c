@@ -28,7 +28,6 @@ int main() {
     do {
         opcao = menu();
         switch(opcao){
-<<<<<<< HEAD
             case 1: pesquisaHash();     break;
             case 2: estatisticasHash(); break;
             case 3: listaCep();			break;
@@ -40,27 +39,10 @@ int main() {
                 printf("Opção inválida!\n");
                 pausa();
                 break;
-=======
-            case 1: pesquisaHash();
-					break;
-            case 2: estatisticasHash();
-					break;
-            case 3: listaCep();
-					break;
-            case 4: pesquisaListaCep("48010140");
-					break;
-            case 5: listaHash();
-					break;
-            case 0: break;
-            default:
-                	printf("Opção inválida!\n");
-                	pausa();
-                	break;
->>>>>>> origin/master
         }
     } while(opcao != 0);  				//Condição de saída
     // Fechamento dos arquivos
-    abreCep();    						// Fecha o arquivo de CEPs
-    abreHash();   						// Fecha o arquivo de ordenação (hash)
+    fechaCep();    						// Fecha o arquivo de CEPs
+    fechaHash();   						// Fecha o arquivo de ordenação (hash)
 	return 0;
 }
