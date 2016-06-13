@@ -20,7 +20,7 @@ int criaHash() {
 	HashTab ht;     					// Estrutura para o registro da tabela
     int i;								// Variável auxiliar
     long marco = trunc(MAXHASH / 50);	// Auxiliar para o marco da barra de progresso
-    
+
     arqhash = fopen(HASHFILE, "w");							// Cria o arquivo
     arqhash = freopen(HASHFILE, "r+", arqhash);  			// Reabre-o para escrita
 	printf("Criando o arquivo inicial de índices...   ");	// Exibe mensagem de criação
@@ -57,10 +57,10 @@ int indexaHash() {
 	printf("\n\n0%% ");
     // Loop para circular pelos registros de CEPs
 	//while (strlen(e.cep) > 0) {
-	while(!feof(arqcep)) {
- 		registro++;
-    	e = leCep(registro);   //Lê o primeiro registro do arquivo de CEps
+    registro++;
+    e = leCep(registro);   //Lê o registro do arquivo de CEps
 printf("\n\nLido do arquivo de CEPs - Posição: %ld - CEP: %s", registro, e.cep);
+	while(strlen(e.cep) > 0) {
         h = calculaHash(atol(e.cep));  // Calcula a posição para a indexação
 printf("\nPosição calculada no hash: %ld - CEP: %ld % 900001", h, atol(e.cep));
         // Vai até a linha calculada da tabela e guarda as informações contidas
@@ -125,8 +125,12 @@ pausa();
         }
 //if ((registro % 50 ==0) && (registro > 0)) pausa();
         if (registro % marco == 0) printf("%c", 187);	// Exibe o andamento do processo
+        registro++;
+        e = leCep(registro);   //Lê os registros do arquivo de CEps
+printf("\n\nLido do arquivo de CEPs - Posição: %ld - CEP: %s", registro, e.cep);
     }
     printf(" 100%%\n\n");
+    fechaCep();							// Abre o arquivo de CEPs
 	return 0;
 }
 
@@ -173,44 +177,80 @@ int estatisticasHash() {
 	int *colisoes;
 	long h;
     long registro = -1;
-    long tamanho;   // Guarda o tamanho do arquivo
+    long tamarqCep;   // Guarda o tamanho do arquivo
+    long marco; 	// Auxiliar para o marco da barra de progresso
+	long resultado[MAXCOLISOES + 2];
+	long i;
+	long somacolisoes = 0;
+	long totalregCep;
 
     colisoes = malloc (MAXHASH * sizeof (int));
     if (colisoes == NULL) {
         printf ("Erro! Nao foi possível alocar memória para o vetor.\n");
         exit (EXIT_FAILURE);
     }
-	int resultado[20];
-	long int i;
-
+	marco = trunc(MAXHASH / 30);
+    limpaTela();
+ 	printf("Zerando vetor...        0%% ");
     for (i = 0; i <= MAXHASH; i++) {
-        if (i < 20) resultado[i] = 0;
+        if (i < MAXCOLISOES + 2) resultado[i] = 0;
         colisoes[i] = 0;
+        if (i % marco == 0) printf("%c", 187);	// Exibe o andamento do processo
     }
-
+    printf(" 100%%\n");
+	marco = trunc(ultregCep()/30);		// Calcula o marco para desenho da barra
+    arqhash = fopen(HASHFILE, "r+");	// Abre o índice hash zerado
+    abreCep();							// Abre o arquivo de CEPs
+  	printf("Lendo índices...        0%% ");
     registro++;
     e = leCep(registro);
-//	while(strlen(e.cep) > 0) {
-	while(!feof(arqcep)) {
-        h = calculaHash(strtol(e.cep, NULL, 10));
+	while(strlen(e.cep) > 0) {
+        h = calculaHash(atol(e.cep));
         colisoes[h]++;
+        if (registro % marco == 0) printf("%c", 187);	// Exibe o andamento do processo
         registro++;
         e = leCep(registro);
     }
-
+    tamarqCep = ftell(arqcep);
+    printf(" 100%%\n");
+    fechaCep();							// Abre o arquivo de CEPs
+ 	marco = trunc(MAXHASH / 30);
+  	printf("Gerando estatisticas... 0%% ");
     for (i = 0; i <= MAXHASH; i++) {
         resultado[colisoes[i]]++;
+        if (i % marco == 0) printf("%c", 187);	// Exibe o andamento do processo
     }
+    printf(" 100%%\n\n");
+    limpaTela();
+    for (i = 0; i < MAXCOLISOES + 2; i++){
+        if (i == 0) {
+            printf("registros não ocupados: %d de %ld\n", resultado[0], MAXHASH);
+        } else if (i == 1) {
+            printf("Nenhuma colisão.......: %d\n", resultado[1]);
+        } else if (i == 2) {
+            printf(" 1 colisão............: %d\n", resultado[i]);
+        } else if (i > 2 && i < 11){
+            printf(" %ld colisões...........: %d\n", (i - 1), resultado[i]);
+        } else {
+            printf("%ld colisões...........: %d\n", (i - 1), resultado[i]);
+        }
+        if (i > 1) somacolisoes = somacolisoes + resultado[i];
+   }
 
-    for (i = 0; i < 20 ; i++){
-        printf("Quantidade de elementos %ld: %d\n", i, resultado[i]);
-    }
+ 	// Exibe informações estatísticas
+    totalregCep = tamarqCep / sizeof(Endereco);
 
+   printf("Somatório de colisões: %ld\n", somacolisoes);
+   printf("Ocupação: %ld\n", resultado[1]);
+   printf("Hashs: %ld\n", MAXHASH);
+   printf("totalregCep: %ld\n", totalregCep);
+
+    printf("Taxa de ocupação: %2.2f%%\n", (resultado[1] / MAXHASH));
+    printf("Taxa de colisões: %2.2f%%\n", (somacolisoes / totalregCep));
  	// Exibe informações do arquivo de CEPs
-	printf("Total de CEPs no arquivo: %ld\n", ultregCep());
+	printf("Total de CEPs no arquivo: %ld\n", totalregCep);
 	printf("Tamanho dos Registros...: %d bytes\n", sizeof(Endereco));
-	printf("Tamanho do Arquivo......: %ld bytes\n", tamanho);
-
+	printf("Tamanho do Arquivo......: %ld bytes", tamarqCep);
     free(colisoes);
     pausa();
 	return 0;
@@ -228,7 +268,7 @@ int listaHash() {
 	printf("Listando o arquivo de índices...\n\n");
     registro++;
     ht = leHash(registro);
-    while(!feof(arqhash)) {
+    while(ht.CEP != "") {
         printf("\nRegistro: %ld - ", registro);
         printf("CEP: %ld - ", ht.CEP);
         printf("Posição: %ld - ", ht.PosArq);
@@ -309,7 +349,7 @@ Função....: calculaHash
 Finalidade: Retorna o cálculo para a tabela de dispersão
 ******************************************************************/
 long calculaHash(long valor) {
-	return (valor % MAXHASH);	
+	return (valor % MAXHASH);
 }
 
 /******************************************************************
