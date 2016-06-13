@@ -4,22 +4,26 @@
 Arquivo...: cep.c
 Autor.....: José Américo Rodrigues
 Finalidade: Operações no arquivo nao ordenado de CEPs
+Atualizações:
+13/06/2016 - Atualizados os loops para andamento do ponteiro
 ******************************************************************/
-#include <cep.h>
+#include "cep.h"
+#include "util.h"
 
 /******************************************************************
 Função....: listaCep
 Finalidade: Lista os registros do arquivo de CEPs
 ******************************************************************/
 int listaCep() {
+	Endereco e;     // Estrutura para guardar um registro
     long registro = -1;
 
     limpaTela();
 	printf("Listando o arquivo de CEPs...\n\n");
-
     registro++;
     e = leCep(registro);
-    while(!feof(arqcep)) {
+    //while (strlen(e.cep) > 0) {
+	while(!feof(arqcep)) {
         imprimeCep(registro, e);
         registro++;
         e = leCep(registro);
@@ -34,6 +38,7 @@ Finalidade: Lista os registros do arquivo de CEPs após pesquisa de
             um dado registro
 ******************************************************************/
 int pesquisaListaCep(char cep[9]) {
+	Endereco e;     // Estrutura para guardar um registro
     long registro = -1;
     int naoencontrado = 1;
 
@@ -41,7 +46,8 @@ int pesquisaListaCep(char cep[9]) {
 	printf("Listando o arquivo de CEPs a partir do CEP %s...\n\n", cep);
     registro++;
     e = leCep(registro);
-    while(!feof(arqcep)) {
+    //while (strlen(e.cep) > 0) {
+	while(!feof(arqcep)) {
         // Imprime somente o registro selecionado e posteriores
         if (strcmp(e.cep, cep)) naoencontrado = 0;
         if (naoencontrado == 0) imprimeCep(registro, e);
@@ -60,14 +66,14 @@ int abreCep() {
     // Verifica a existência do arquivo de CEPs e abre-o
 	arqcep = fopen(CEPFILE,"r");
 	if(!arqcep) {
-		fprintf(stderr,"Arquivo %s nao pode ser aberto para leitura\n", CEPFILE);
+		fprintf(stderr,"Arquivo %s não pode ser aberto para leitura\n", CEPFILE);
 		return 1;
 	}
 }
 
 /******************************************************************
 Função....: leCep
-Finalidade: Le um registro do arquivo de CEPs
+Finalidade: Lê um registro do arquivo de CEPs
 Parâmetros: pos - Deslocamento do registro em relação ao início do
                   arquivo de CEPs
 ******************************************************************/
@@ -111,4 +117,18 @@ Finalidade: Fecha o arquivo de CEPs
 int fechaCep() {
 	fclose(arqcep); // Fecha o arquivo de CEPs
     return 0;
+}
+
+/******************************************************************
+Função....: ultregCep
+Finalidade: Retornar a última posição do arquivo de CEPs
+******************************************************************/
+long ultregCep() {
+	long fim;
+
+	abreCep();							// Abre o arquivo de CEPs
+	fseek(arqcep, 0, SEEK_END);
+	fim = ftell(arqcep);
+	fechaCep();
+    return (fim / sizeof(Endereco));
 }
