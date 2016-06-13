@@ -207,7 +207,7 @@ int estatisticasHash() {
         printf ("Erro! Nao foi possível alocar memória para o vetor.\n");
         exit (EXIT_FAILURE);
     }
-	marco = trunc(MAXHASH / 30);
+	marco = trunc(MAXHASH / 50);
     limpaTela();
  	printf("Zerando vetor...        0%% ");
     for (i = 0; i <= MAXHASH; i++) {
@@ -216,7 +216,7 @@ int estatisticasHash() {
         if (i % marco == 0) printf("%c", 187);	// Exibe o andamento do processo
     }
     printf(" 100%%\n");
-	marco = trunc(ultregCep()/30);		// Calcula o marco para desenho da barra
+	marco = trunc(ultregCep()/50);		// Calcula o marco para desenho da barra
     arqhash = fopen(HASHFILE, "r+");	// Abre o índice hash zerado
     abreCep();							// Abre o arquivo de CEPs
   	printf("Lendo índices...        0%% ");
@@ -233,7 +233,7 @@ int estatisticasHash() {
     totalregCep = tamarqCep / sizeof(Endereco);
     fechaCep();		// Fecha o arquivo de CEPs
     printf(" 100%%\n");
- 	marco = trunc(MAXHASH / 30);
+ 	marco = trunc(MAXHASH / 50);
   	printf("Gerando estatisticas... 0%% ");
     for (i = 0; i <= MAXHASH; i++) {
         resultado[colisoes[i]]++;
