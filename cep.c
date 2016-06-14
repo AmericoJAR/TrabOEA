@@ -18,6 +18,7 @@ int listaCep() {
 	Endereco e;     // Estrutura para guardar um registro
     long registro = -1;
 
+    abreCep();
     limpaTela();
 	printf("Listando o arquivo de CEPs...\n\n");
     registro++;
@@ -28,6 +29,7 @@ int listaCep() {
         registro++;
         e = leCep(registro);
     }
+    fechaCep();
 	pausa();
 	return 1;
 }
