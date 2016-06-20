@@ -7,6 +7,8 @@ Finalidade: Operações no arquivo da tabela hash
 Atualizações:
 13/06/2016 - Atualizadas algumas rotinas mas ainda com problemas
              na indexação (criação da tabela hash de dispersão).
+             Indexa até o final, mas no meio lê posições de CEP
+             zero que, até então, não existia.
            - Incluída precaução contra CEPs duplicados.
            - Completada a rotina de pesquisa.
            - Criado uma arquivo de log para tentar desvendar o
@@ -51,7 +53,7 @@ Finalidade: Indexa o arquivo da tabela hash através do arquivo de CEPs
 int indexaHash() {
     FILE *arqlog;       // Ponteiro para o arquivo de log
 	Endereco e;         // Estrutura para guardar um registro
-    HashTab ht, htaux   // Auxiliares para adicionar registros na tabela
+    HashTab ht, htaux;   // Auxiliares para adicionar registros na tabela
     long h = 0;			// Posição na tabela hash
     long registro = -1;	// Posição atual do registro de CEPs
     long posfinal = 0;  // Final do arquivo de índices (hash)
@@ -77,26 +79,26 @@ int indexaHash() {
                         h, ht.CEP, ht.PosArq, ht.Proximo);
         // Guarda as informações na variável auxiliar
         htaux = inicializaHash(atol(e.cep), registro, -1);    // Novo CEP
-        // Se não houver um CEP na linha...
-        if ((ht.CEP == 0) || (ht.PosArq == -1)) {
-            escreveHash(htaux, h, SEEK_SET);    // Guarda o CEP no arquivo hash
-            fprintf(arqlog, "SEM COLISÃO\nGravado no Hash - Posição: %ld - CEP: %ld - PosArq: %ld - Prox: %ld\n",
-                            h, htaux.CEP, htaux.PosArq, htaux.Proximo);
-       }
-        // Há colisão...
-        else {
-            // Se não for um CEP repetido...
-            if (ht.CEP != atol(e.cep)) {
+        // Se não for um CEP repetido...
+        if (ht.CEP != atol(e.cep)) {
+            // Se não houver um CEP na linha...
+            if ((ht.CEP == 0) || (ht.PosArq == -1)) {
+                escreveHash(htaux, h, SEEK_SET);    // Guarda o CEP no arquivo hash
+                fprintf(arqlog, "SEM COLISÃO\nGravado no Hash - Posição: %ld - CEP: %ld - PosArq: %ld - Prox: %ld\n",
+                                h, htaux.CEP, htaux.PosArq, htaux.Proximo);
+            }
+            // Há colisão...
+            else {
 	            // 1ª colisão
 	            if (ht.Proximo == -1) {
                 	escreveHash(htaux, 0, SEEK_END);    // Adiciona o CEP no final do arquivo
                     // Guarda a posição da nova linha para sobrescrever o campo
                 	// Proximo da linha onde houve a colisão
-                	posicaofinal = ultregHash() - 1;
+                	posfinal = ultregHash() - 1;
                 	fprintf(arqlog, "1ª COLISÃO\nAdicionado no Hash - Posição: %ld - CEP: %ld - PosArq: %ld - Prox: %ld\n",
-                                    posicaofinal, htaux.CEP, htaux.PosArq, htaux.Proximo);
+                                    posfinal, htaux.CEP, htaux.PosArq, htaux.Proximo);
                 	// Guarda a nova informação do arquivo de CEPs
-                	htaux = inicializaHash(ht.CEP, ht.PosArq, posicaofinal);
+                	htaux = inicializaHash(ht.CEP, ht.PosArq, posfinal);
                 	escreveHash(htaux, h, SEEK_SET);
                     fprintf(arqlog, "Gravado no Hash - Posição anterior: %ld - CEP: %ld - PosArq: %ld - Prox: %ld\n",
                                     h, htaux.CEP, htaux.PosArq, htaux.Proximo);
@@ -114,11 +116,11 @@ int indexaHash() {
 	                escreveHash(htaux, 0, SEEK_END);    // Adiciona o CEP no final do arquivo
 	                // Guarda a posição da nova linha para sobrescrever o campo
 	                // Proximo da linha onde houve a colisão
-	                posicaofinal = ultregHash() - 1;
+	                posfinal = ultregHash() - 1;
                     fprintf(arqlog, "VÁRIAS COLISÕES\nAdicionado no Hash - Posição: %ld - CEP: %ld - PosArq: %ld - Prox: %ld\n",
-                                    posicaofinal, htaux.CEP, htaux.PosArq, htaux.Proximo);
+                                    posfinal, htaux.CEP, htaux.PosArq, htaux.Proximo);
 	                // Grava a nova informação do arquivo de CEPs
-                	htaux = inicializaHash(ht.CEP, ht.PosArq, posicaofinal);
+                	htaux = inicializaHash(ht.CEP, ht.PosArq, posfinal);
 	                escreveHash(htaux, h, SEEK_SET);
                     fprintf(arqlog, "Gravado no Hash - Posição anterior: %ld - CEP: %ld - PosArq: %ld - Prox: %ld\n",
                                     h, htaux.CEP, htaux.PosArq, htaux.Proximo);
@@ -165,6 +167,9 @@ int pesquisaHash() {
     else {
         while (ht.Proximo != -1) {
             ht = leHash(ht.Proximo);
+            if (atol(cep) == ht.CEP) {
+                flag = 1;
+            }
         }
         // CEP encontrado... Pegando informações do arquivo de CEPs
         if (atol(cep) == ht.CEP) {
