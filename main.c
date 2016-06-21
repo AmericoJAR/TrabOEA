@@ -31,9 +31,8 @@ int main() {
             case 1: pesquisaHash();     break;
             case 2: estatisticasHash(); break;
             case 3: listaCep();			break;
-//            case 4: pesquisaListaCep("48010140");
-//					break;
             case 4: listaHash();		break;
+            case 5: registroHash();     break;
             case 0: break;
             default:
                 printf("Opção inválida!\n");

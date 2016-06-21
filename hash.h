@@ -36,6 +36,7 @@ int fechaHash();
 long ultregHash();
 long calculaHash(long valor);
 HashTab inicializaHash(long cep, long posarq, long proximo);
+int registroHash();
 
 FILE *arqhash;  // Ponteiro para o arquivo da tabela hash
 // HashTab ht;   // Estrutura para o registro da tabela

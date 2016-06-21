@@ -22,8 +22,8 @@ int menu() {
 	printf("1. Consultar CEP\n");
 	printf("2. Verificar estatísticas\n");
 	printf("3. Listar CEPs\n");
-//	printf("4. Listar CEPs após consulta\n");
 	printf("4. Listar Tabela Hash\n");
+	printf("5. Ler informações de um registro Hash\n");
 	printf("0. Sair\n\n");
 	printf("Escolha uma opção: ");
 	scanf("%d", &num);
